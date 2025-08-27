@@ -200,6 +200,10 @@ All colors MUST be HSL.
     box-shadow: var(--glow-primary), 0 8px 25px -5px hsl(345 100% 59% / 0.4);
   }
   
+  .btn-pulse {
+    animation: subtle-pulse 7s ease-in-out infinite;
+  }
+  
   .btn-tiktok {
     @apply bg-foreground text-background px-6 py-3 rounded-lg font-medium transition-all duration-300;
   }
