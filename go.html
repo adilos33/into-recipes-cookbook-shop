@@ -1,66 +1,107 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Opening…</title>
-<style>
-  body{margin:0;background:#0b0b0b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-  .card{max-width:640px;width:100%;background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:18px}
-  h1{font-size:20px;margin:0 0 8px}
-  p{color:#c7c7c7;margin:0 0 12px}
-  .btn{display:block;text-align:center;padding:12px 14px;border-radius:12px;border:1px solid #2a2a2a;background:#1b1b1b;color:#fff;text-decoration:none;font-weight:700;margin-top:10px}
-  .primary{background:#ff2d55;border:none}
-  small{color:#9aa0a6}
-  .raw{word-break:break-all;font-size:12px;color:#9aa0a6}
-</style>
-<script>
-  // نقرأ الرابط المشفر من ?u=
-  const q=new URLSearchParams(location.search);
-  const raw=q.get('u')||q.get('url')||'';
-  const target=raw?decodeURIComponent(raw):'';
-  // نحاول التحويل بعد تحميل الصفحة مباشرة
-  document.addEventListener('DOMContentLoaded',()=>{
-    if(target){
-      // الطريقة الأساسية
-      setTimeout(()=>{ location.replace(target); }, 300);
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Opening…</title>
+  <meta name="description" content="Open the TikTok Shop link. If the in-app browser blocks it, open in the external browser or copy the link.">
+  <style>
+    :root{
+      --bg:#0b0b0b; --card:#141414; --ring:#2a2a2a; --text:#ffffff; --muted:#c7c7c7; --accent:#ff2d55;
     }
-  });
-</script>
+    *{box-sizing:border-box}
+    html,body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+    .card{width:100%;max-width:680px;background:var(--card);border:1px solid var(--ring);border-radius:16px;padding:20px}
+    h1{margin:0 0 8px;font-size:22px}
+    p{margin:0 0 12px;color:var(--muted);line-height:1.5}
+    .btn{display:block;width:100%;text-align:center;padding:14px 16px;margin-top:10px;border-radius:12px;
+         background:#1b1b1b;border:1px solid var(--ring);color:#fff;text-decoration:none;font-weight:700}
+    .btn.primary{background:var(--accent);border:none}
+    .btn:active{transform:translateY(1px)}
+    .tip{font-size:13px;color:#9aa0a6}
+    .raw{word-break:break-all;font-size:12px;color:#9aa0a6;margin-top:8px}
+  </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Opening in TikTok…</h1>
-    <p>If it doesn’t open automatically, use the options below.</p>
+  <div class="wrap">
+    <div class="card">
+      <h1>Opening in TikTok…</h1>
+      <p>If it doesn’t open automatically, use the options below.</p>
 
-    <a id="open" class="btn primary" rel="nofollow sponsored noopener">Open in TikTok Shop</a>
-    <a id="ext"  class="btn" target="_blank" rel="nofollow sponsored noopener">Open in external browser</a>
-    <a id="copy" class="btn" href="#">Copy link</a>
+      <!-- الزر الأساسي: فتح في المتصفح الخارجي (أفضل حل داخل TikTok WebView) -->
+      <a id="ext" class="btn primary" rel="nofollow sponsored noopener">Open in external browser</a>
 
-    <p id="tip" style="display:none"><small>Tip: In TikTok’s in-app browser tap <b>•••</b> → <b>Open in external browser</b>.</small></p>
-    <p class="raw" id="show"></p>
+      <!-- محاولة فتح عادية (قد يمنعها متصفح تيكتوك) -->
+      <a id="open" class="btn" rel="nofollow sponsored noopener">Try open in TikTok Shop</a>
+
+      <!-- نسخ الرابط -->
+      <a id="copy" class="btn" href="#">Copy link</a>
+
+      <p id="tt-tip" class="tip" style="display:none">
+        Tip: In TikTok’s in-app browser, tap <b>•••</b> and choose <b>Open in external browser</b>.
+        You can also long-press the button to open in Safari/Chrome.
+      </p>
+
+      <p id="show" class="raw"></p>
+    </div>
   </div>
 
-<script>
-  const show=document.getElementById('show');
-  const open=document.getElementById('open');
-  const ext =document.getElementById('ext');
-  const copy=document.getElementById('copy');
+  <script>
+    // 1) قراءة الرابط من الاستعلام ?u= أو ?url=
+    const q = new URLSearchParams(location.search);
+    const raw = q.get('u') || q.get('url') || '';
+    const target = raw ? decodeURIComponent(raw) : '';
 
-  const ua=navigator.userAgent.toLowerCase();
-  const isTT=ua.includes('tiktok')||ua.includes('ttwebview')||ua.includes('musical.ly');
-  if(isTT) document.getElementById('tip').style.display='block';
+    // 2) تهيئة الأزرار
+    const ext  = document.getElementById('ext');
+    const open = document.getElementById('open');
+    const copy = document.getElementById('copy');
+    const show = document.getElementById('show');
 
-  if(target){
-    open.href=target; ext.href=target; show.textContent=target;
-  }
-  copy.addEventListener('click',e=>{
-    e.preventDefault();
-    if(!target) return;
-    navigator.clipboard.writeText(target).then(()=>{
-      copy.textContent='Copied ✓'; setTimeout(()=>copy.textContent='Copy link',1500);
+    if (target) {
+      ext.href  = target;
+      open.href = target;
+      show.textContent = target;
+    } else {
+      document.querySelector('.card').insertAdjacentHTML('beforeend',
+        '<p class="tip">Missing link. Please return to the previous page.</p>');
+    }
+
+    // 3) داخل TikTok WebView: إظهار التلميح
+    const ua = navigator.userAgent.toLowerCase();
+    const isTikTok = ua.includes('tiktok') || ua.includes('ttwebview') || ua.includes('musical.ly');
+    if (isTikTok) document.getElementById('tt-tip').style.display = 'block';
+
+    // 4) سلوك الأزرار:
+    // - زر المتصفح الخارجي: استخدم location.href (نفس التبويب) لأنه الأكثر نجاحًا داخل الويب-فيو
+    ext.addEventListener('click', (e) => {
+      if (!target) return;
+      e.preventDefault();
+      location.href = target;       // يفتح في نفس التبويب (أفضل لـ TikTok)
     });
-  });
-</script>
+
+    // - زر المحاولة العادية: location.replace (إن سمح المتصفح)
+    open.addEventListener('click', (e) => {
+      if (!target) return;
+      e.preventDefault();
+      location.replace(target);
+    });
+
+    // - زر النسخ
+    copy.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!target) return;
+      navigator.clipboard.writeText(target).then(() => {
+        copy.textContent = 'Copied ✓';
+        setTimeout(() => copy.textContent = 'Copy link', 1500);
+      });
+    });
+
+    // 5) محاولة تحويل تلقائي خفيفة (قد تُحجب من TikTok — لذلك الأزرار موجودة دائمًا)
+    if (target) {
+      setTimeout(() => { try { location.replace(target); } catch(_){} }, 400);
+    }
+  </script>
 </body>
 </html>
