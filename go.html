@@ -13,7 +13,7 @@
        background:#1b1b1b;color:#fff;text-decoration:none;font-weight:700;margin-top:10px}
   .primary{background:#ff2d55;border:none}
   small{color:#9aa0a6}
-  code{background:#111;padding:2px 6px;border-radius:6px}
+  .raw{word-break:break-all;font-size:12px;color:#9aa0a6}
 </style>
 <body>
   <div class="card">
@@ -23,47 +23,46 @@
     <a id="open1" class="btn primary" rel="nofollow sponsored noopener">Open in TikTok Shop</a>
     <a id="open2" class="btn" target="_blank" rel="nofollow sponsored noopener">Open in external browser</a>
     <a id="copy" class="btn" href="#">Copy link</a>
-
-    <p id="tt-tip" style="display:none"><small>
-      Tip for the TikTok in-app browser: tap <b>•••</b> then choose <b>Open in external browser</b>.
-    </small></p>
+    <p id="tip" style="display:none"><small>Tip: In TikTok’s in-app browser tap <b>•••</b> → <b>Open in external browser</b>.</small></p>
+    <p class="raw" id="raw"></p>
   </div>
 
 <script>
-  // read ?u=<encoded URL>
-  const params = new URLSearchParams(location.search);
-  const url = params.get('u') ? decodeURIComponent(params.get('u')) : '';
+  // get ?u=<encoded url> or ?url=<encoded url>
+  const q = new URLSearchParams(location.search);
+  const raw = q.get('u') || q.get('url') || '';
+  const url = raw ? decodeURIComponent(raw) : '';
 
-  // set buttons
   const open1 = document.getElementById('open1');
   const open2 = document.getElementById('open2');
   const copy  = document.getElementById('copy');
-  if(url){ open1.href = url; open2.href = url; }
+  const rawp  = document.getElementById('raw');
+
+  if(url){
+    open1.href = url;
+    open2.href = url;
+    rawp.textContent = url;
+  }
 
   // detect TikTok webview
   const ua = navigator.userAgent.toLowerCase();
-  const isTikTok = ua.includes('tiktok') || ua.includes('musical.ly') || ua.includes('ttwebview');
+  const isTikTok = ua.includes('tiktok') || ua.includes('ttwebview') || ua.includes('musical.ly');
+  if(isTikTok) document.getElementById('tip').style.display = 'block';
 
-  // show tip inside TikTok webview
-  if(isTikTok){ document.getElementById('tt-tip').style.display = 'block'; }
-
-  // try auto-redirect after short delay
+  // auto-redirect attempts
   if(url){
-    setTimeout(() => {
-      // open in same tab first (works in many cases)
-      window.location.href = url;
-      // safety second attempt (new tab)
-      setTimeout(() => { window.open(url, '_blank'); }, 800);
-    }, 700);
+    // meta-like redirect
+    setTimeout(()=>{ window.location.replace(url); }, 300);
+    // backup attempt (new tab)
+    setTimeout(()=>{ try{ window.open(url,'_blank'); }catch(e){} }, 1200);
   }
 
-  // copy button
-  copy.addEventListener('click', (e) => {
+  copy.addEventListener('click', (e)=>{
     e.preventDefault();
     if(!url) return;
     navigator.clipboard.writeText(url).then(()=>{
-      copy.textContent = 'Copied ✓';
-      setTimeout(()=>copy.textContent='Copy link', 1500);
+      copy.textContent='Copied ✓';
+      setTimeout(()=>copy.textContent='Copy link',1500);
     });
   });
 </script>
