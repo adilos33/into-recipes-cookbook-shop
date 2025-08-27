@@ -1,68 +1,64 @@
 <!doctype html>
 <html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Opening…</title>
 <style>
-  body{margin:0;background:#0b0b0b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-       min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  body{margin:0;background:#0b0b0b;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
   .card{max-width:640px;width:100%;background:#141414;border:1px solid #2a2a2a;border-radius:14px;padding:18px}
   h1{font-size:20px;margin:0 0 8px}
   p{color:#c7c7c7;margin:0 0 12px}
-  .btn{display:block;text-align:center;padding:12px 14px;border-radius:12px;border:1px solid #2a2a2a;
-       background:#1b1b1b;color:#fff;text-decoration:none;font-weight:700;margin-top:10px}
+  .btn{display:block;text-align:center;padding:12px 14px;border-radius:12px;border:1px solid #2a2a2a;background:#1b1b1b;color:#fff;text-decoration:none;font-weight:700;margin-top:10px}
   .primary{background:#ff2d55;border:none}
   small{color:#9aa0a6}
   .raw{word-break:break-all;font-size:12px;color:#9aa0a6}
 </style>
+<script>
+  // نقرأ الرابط المشفر من ?u=
+  const q=new URLSearchParams(location.search);
+  const raw=q.get('u')||q.get('url')||'';
+  const target=raw?decodeURIComponent(raw):'';
+  // نحاول التحويل بعد تحميل الصفحة مباشرة
+  document.addEventListener('DOMContentLoaded',()=>{
+    if(target){
+      // الطريقة الأساسية
+      setTimeout(()=>{ location.replace(target); }, 300);
+    }
+  });
+</script>
+</head>
 <body>
   <div class="card">
     <h1>Opening in TikTok…</h1>
     <p>If it doesn’t open automatically, use the options below.</p>
 
-    <a id="open1" class="btn primary" rel="nofollow sponsored noopener">Open in TikTok Shop</a>
-    <a id="open2" class="btn" target="_blank" rel="nofollow sponsored noopener">Open in external browser</a>
+    <a id="open" class="btn primary" rel="nofollow sponsored noopener">Open in TikTok Shop</a>
+    <a id="ext"  class="btn" target="_blank" rel="nofollow sponsored noopener">Open in external browser</a>
     <a id="copy" class="btn" href="#">Copy link</a>
+
     <p id="tip" style="display:none"><small>Tip: In TikTok’s in-app browser tap <b>•••</b> → <b>Open in external browser</b>.</small></p>
-    <p class="raw" id="raw"></p>
+    <p class="raw" id="show"></p>
   </div>
 
 <script>
-  // get ?u=<encoded url> or ?url=<encoded url>
-  const q = new URLSearchParams(location.search);
-  const raw = q.get('u') || q.get('url') || '';
-  const url = raw ? decodeURIComponent(raw) : '';
+  const show=document.getElementById('show');
+  const open=document.getElementById('open');
+  const ext =document.getElementById('ext');
+  const copy=document.getElementById('copy');
 
-  const open1 = document.getElementById('open1');
-  const open2 = document.getElementById('open2');
-  const copy  = document.getElementById('copy');
-  const rawp  = document.getElementById('raw');
+  const ua=navigator.userAgent.toLowerCase();
+  const isTT=ua.includes('tiktok')||ua.includes('ttwebview')||ua.includes('musical.ly');
+  if(isTT) document.getElementById('tip').style.display='block';
 
-  if(url){
-    open1.href = url;
-    open2.href = url;
-    rawp.textContent = url;
+  if(target){
+    open.href=target; ext.href=target; show.textContent=target;
   }
-
-  // detect TikTok webview
-  const ua = navigator.userAgent.toLowerCase();
-  const isTikTok = ua.includes('tiktok') || ua.includes('ttwebview') || ua.includes('musical.ly');
-  if(isTikTok) document.getElementById('tip').style.display = 'block';
-
-  // auto-redirect attempts
-  if(url){
-    // meta-like redirect
-    setTimeout(()=>{ window.location.replace(url); }, 300);
-    // backup attempt (new tab)
-    setTimeout(()=>{ try{ window.open(url,'_blank'); }catch(e){} }, 1200);
-  }
-
-  copy.addEventListener('click', (e)=>{
+  copy.addEventListener('click',e=>{
     e.preventDefault();
-    if(!url) return;
-    navigator.clipboard.writeText(url).then(()=>{
-      copy.textContent='Copied ✓';
-      setTimeout(()=>copy.textContent='Copy link',1500);
+    if(!target) return;
+    navigator.clipboard.writeText(target).then(()=>{
+      copy.textContent='Copied ✓'; setTimeout(()=>copy.textContent='Copy link',1500);
     });
   });
 </script>
